@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, RotateCw, Lock, MessageSquare, Puzzle, Search, Mic, Camera, MapPin, Calendar, Link as LinkIcon, X } from 'lucide-react';
 import SimulatedExtension from './SimulatedExtension';
+import Section from './Section';
+import { guideData } from '../data/guideContent';
 
 interface BrowserDemoProps {
   onExit: () => void;
@@ -12,8 +14,6 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
 
   const handleNavigate = (newUrl: string) => {
     setUrl(newUrl);
-    // Optionally close extension when navigating? Let's keep it open to show persistence or close it for realism.
-    // Realism: Extension sidebar stays open on navigation in some browsers, but closes in others. Let's keep it open if it's the same tab.
   };
 
   const getDomain = (fullUrl: string) => {
@@ -23,6 +23,32 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
       return fullUrl;
     }
   };
+
+  const GuidePage = () => (
+    <div className="w-full h-full bg-[#050505] overflow-y-auto text-gray-200">
+      <div className="max-w-4xl mx-auto px-6 py-12">
+          <header className="mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-mono mb-6 border border-indigo-500/20">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+              2025 Architecture Edition
+            </div>
+            <h1 className="text-3xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 tracking-tight mb-6">
+              Xchat Me <br/> Master Guide
+            </h1>
+            <p className="text-lg text-gray-400 leading-relaxed max-w-2xl">
+              The complete "Copy-Paste" blueprint for building a distributed chat architecture.
+            </p>
+          </header>
+          <hr className="border-gray-800 mb-12" />
+          {guideData.map((section) => (
+            <Section key={section.id} data={section} />
+          ))}
+          <footer className="mt-20 pt-12 border-t border-gray-800 text-center text-gray-500 text-sm pb-12">
+            <p>© 2025 Xchat Me Architecture.</p>
+          </footer>
+      </div>
+    </div>
+  );
 
   const GooglePage = () => (
     <div className="flex flex-col items-center w-full max-w-2xl px-4 pt-[10vh]">
@@ -40,6 +66,9 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
         <input 
           className="w-full border border-gray-200 rounded-full py-3 pl-12 pr-12 shadow-sm hover:shadow-md transition-shadow outline-none text-gray-700" 
           defaultValue="Xchat Me Architecture Guide"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleNavigate('https://xchat.me');
+          }}
         />
         <div className="absolute right-4 top-2.5 flex gap-3 text-gray-500">
           <Mic size={20} className="cursor-pointer hover:text-blue-500" />
@@ -48,7 +77,10 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
       </div>
 
       <div className="flex gap-3">
-        <button className="bg-[#f8f9fa] border border-[#f8f9fa] hover:border-[#dadce0] hover:shadow-sm px-4 py-2 text-sm text-[#3c4043] rounded font-medium">
+        <button 
+          onClick={() => handleNavigate('https://xchat.me')}
+          className="bg-[#f8f9fa] border border-[#f8f9fa] hover:border-[#dadce0] hover:shadow-sm px-4 py-2 text-sm text-[#3c4043] rounded font-medium"
+        >
           Google Search
         </button>
         <button className="bg-[#f8f9fa] border border-[#f8f9fa] hover:border-[#dadce0] hover:shadow-sm px-4 py-2 text-sm text-[#3c4043] rounded font-medium">
@@ -157,7 +189,10 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
                         Just dropped the new Xchat Me Architecture Guide! 
                         Check it out to learn how to build distributed chat apps on the Edge. 👇
                     </p>
-                    <div className="mt-3 rounded-2xl border border-gray-700 overflow-hidden bg-black">
+                    <div 
+                      className="mt-3 rounded-2xl border border-gray-700 overflow-hidden bg-black cursor-pointer hover:border-gray-600 transition-colors"
+                      onClick={() => handleNavigate('https://xchat.me')}
+                    >
                         <div className="h-32 bg-gray-800 flex items-center justify-center">
                             <span className="text-gray-500 font-mono text-xs">xchat-architecture-preview.png</span>
                         </div>
@@ -171,6 +206,12 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
         </div>
       </div>
     );
+  };
+
+  const renderPage = () => {
+    if (url.includes('x.com')) return <XProfilePage />;
+    if (url.includes('xchat.me')) return <GuidePage />;
+    return <GooglePage />;
   };
 
   return (
@@ -214,6 +255,9 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
             <input 
               value={url} 
               onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => {
+                 if(e.key === 'Enter') handleNavigate(url);
+              }}
               className="bg-transparent border-none outline-none w-full text-gray-300" 
             />
           </div>
@@ -239,7 +283,7 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
         {/* Browser Viewport (The "Webpage") */}
         <div className="flex-1 relative overflow-hidden flex flex-col items-center bg-white">
             {/* Page Content */}
-            {url.includes('x.com') ? <XProfilePage /> : <GooglePage />}
+            {renderPage()}
 
             {/* The Extension Overlay */}
             <SimulatedExtension 

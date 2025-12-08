@@ -282,19 +282,45 @@ npx wrangler deploy`
   {
     id: "phase-3",
     title: "Phase 3: The Frontend",
-    description: "Chrome Extension handling Slide-out UI, Shadow DOM, and Logic.",
+    description: "Chrome Extension using Vite + React. We install Tailwind locally to comply with Manifest V3 No-Remote-Code policy.",
     steps: [
       {
-        title: "1. Create Project",
+        title: "1. Create Project & Install Tailwind",
         code: {
           language: "bash",
           code: `npm create vite@latest xchat-me-frontend -- --template react-ts
 cd xchat-me-frontend
-npm install lucide-react`
+npm install lucide-react
+
+# Install Tailwind Locally
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p`
         }
       },
       {
-        title: "2. public/manifest.json",
+        title: "2. Configure Tailwind",
+        description: "We must configure the build paths and create the CSS entry point.",
+        code: {
+          language: "javascript",
+          filename: "tailwind.config.js & src/index.css",
+          code: `// tailwind.config.js
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: { extend: {} },
+  plugins: [],
+}
+
+// src/index.css (Add these lines)
+@tailwind base;
+@tailwind components;
+@tailwind utilities;`
+        }
+      },
+      {
+        title: "3. public/manifest.json",
         description: "Location: public/ folder",
         code: {
           language: "json",
@@ -318,7 +344,7 @@ npm install lucide-react`
         }
       },
       {
-        title: "3. public/background.js",
+        title: "4. public/background.js",
         description: "Location: public/ folder",
         code: {
           language: "javascript",
@@ -339,36 +365,36 @@ chrome.runtime.onMessageExternal.addListener((msg) => {
         }
       },
       {
-        title: "4. src/content.tsx (Shadow DOM Host)",
-        description: "Location: Overwrite src/main.tsx or create src/content.tsx",
+        title: "5. src/content.tsx (Shadow DOM Host)",
+        description: "This script injects the compiled Tailwind CSS directly into the Shadow DOM, avoiding external CDN blocks.",
         code: {
           language: "tsx",
           filename: "src/content.tsx",
           code: `import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './index.css';
+import css from './index.css?inline'; // Vite imports CSS as string
 
 // Create Host Element
 const host = document.createElement('div');
 host.id = 'xchat-me-host';
 host.style.position = 'fixed';
-host.style.zIndex = '2147483647'; // Max Z-Index
+host.style.zIndex = '2147483647';
 host.style.top = '0';
 host.style.right = '0';
 host.style.height = '100vh';
-host.style.pointerEvents = 'none'; // Allow clicks to pass through when closed
+host.style.pointerEvents = 'none'; 
 document.body.appendChild(host);
 
 // Create Shadow DOM
 const shadow = host.attachShadow({ mode: 'open' });
 
-// Inject Tailwind (CDN for simplicity in shadow DOM)
+// Inject Compiled Tailwind CSS
 const style = document.createElement('style');
-style.textContent = \`@import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');\`;
+style.textContent = css;
 shadow.appendChild(style);
 
-// Root Component wrapper to handle visibility
+// Root Component wrapper
 function Root() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -378,12 +404,10 @@ function Root() {
     });
   }, []);
 
-  // Update pointer-events based on open state to block/allow clicks
   useEffect(() => {
     host.style.pointerEvents = isOpen ? 'auto' : 'none';
   }, [isOpen]);
 
-  // Pass current hostname to App
   return <App isOpen={isOpen} site={window.location.hostname} />;
 }
 
@@ -391,7 +415,7 @@ ReactDOM.createRoot(shadow).render(<Root />);`
         }
       },
       {
-        title: "5. src/App.tsx (Main UI)",
+        title: "6. src/App.tsx (Main UI)",
         description: "Location: Overwrite src/App.tsx",
         code: {
           language: "tsx",
@@ -403,18 +427,15 @@ export default function App({ isOpen, site }: { isOpen: boolean, site: string })
   const [token, setToken] = useState<string | null>(null);
   const [tab, setTab] = useState<"current" | "global">("current");
   const [topSites, setTopSites] = useState<{site: string, count: number}[]>([]);
-  // Mock messages for animation demo
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    // Check for login token
     chrome.storage.local.get("x_auth_token", (r) => {
       if (r.x_auth_token) setToken(r.x_auth_token);
     });
   }, [isOpen]);
 
   useEffect(() => {
-    // Fetch Top 10 when switching to Global tab
     if (tab === "global") {
       fetch("https://api.xchat.me/stats/top")
         .then(res => res.json())
@@ -422,7 +443,6 @@ export default function App({ isOpen, site }: { isOpen: boolean, site: string })
     }
   }, [tab]);
 
-  // Simulate messages for demo
   useEffect(() => {
     if (isOpen && tab === "current" && messages.length === 0) {
       setTimeout(() => setMessages(p => [...p, "Welcome to " + site]), 500);
@@ -434,110 +454,94 @@ export default function App({ isOpen, site }: { isOpen: boolean, site: string })
   };
 
   return (
-    <>
-      <style>{\`
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .msg-anim { animation: slideIn 0.3s ease-out forwards; }
-      \`}</style>
-
-      {/* Main Container with Slide Animation */}
-      <div className={\`
-        fixed top-0 right-0 h-screen w-[350px] 
-        bg-black/95 backdrop-blur-md text-white border-l border-gray-800 
-        flex flex-col font-sans shadow-2xl 
-        transform transition-transform duration-300 ease-in-out
-        \${isOpen ? 'translate-x-0' : 'translate-x-full'}
-      \`}>
-        
-        {/* HEADER */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-900 text-sm">
-          <div className="flex gap-4">
-            <button 
-              onClick={() => setTab("current")} 
-              className={\`\${tab === "current" ? "text-green-500 border-b-2 border-green-500" : "text-gray-500"} pb-1 font-bold transition-colors\`}>
-              Current
-            </button>
-            <button 
-              onClick={() => setTab("global")} 
-              className={\`\${tab === "global" ? "text-green-500 border-b-2 border-green-500" : "text-gray-500"} pb-1 font-bold transition-colors\`}>
-              Global
-            </button>
-          </div>
+    <div className={\`
+      fixed top-0 right-0 h-screen w-[350px] 
+      bg-black/95 backdrop-blur-md text-white border-l border-gray-800 
+      flex flex-col font-sans shadow-2xl 
+      transform transition-transform duration-300 ease-in-out
+      \${isOpen ? 'translate-x-0' : 'translate-x-full'}
+    \`}>
+      
+      {/* HEADER */}
+      <div className="flex justify-between items-center p-4 border-b border-gray-900 text-sm">
+        <div className="flex gap-4">
+          <button 
+            onClick={() => setTab("current")} 
+            className={\`\${tab === "current" ? "text-green-500 border-b-2 border-green-500" : "text-gray-500"} pb-1 font-bold transition-colors\`}>
+            Current
+          </button>
+          <button 
+            onClick={() => setTab("global")} 
+            className={\`\${tab === "global" ? "text-green-500 border-b-2 border-green-500" : "text-gray-500"} pb-1 font-bold transition-colors\`}>
+            Global
+          </button>
         </div>
-
-        {/* LOGIN SCREEN */}
-        {!token ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-            <MessageSquare className="text-green-500 w-12 h-12 mb-4 animate-bounce" />
-            <h2 className="text-xl font-bold mb-2">Xchat Me</h2>
-            <button onClick={login} className="bg-white text-black font-bold py-3 px-8 rounded-full flex items-center gap-2 mt-4 hover:bg-gray-200 transition-colors">
-              <X className="w-5 h-5" /> Sign in with X
-            </button>
-          </div>
-        ) : (
-          /* MAIN CONTENT */
-          <div className="flex-1 flex flex-col overflow-hidden">
-            
-            {/* TAB: CURRENT ROOM */}
-            {tab === "current" && (
-              <div className="flex-1 flex flex-col">
-                 <div className="p-3 bg-gray-900/50 border-b border-gray-800">
-                    <span className="text-xs text-gray-500 uppercase">Connected to:</span>
-                    <div className="text-green-400 font-bold truncate">{site}</div>
-                 </div>
-
-                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {messages.length === 0 && <div className="text-center mt-20 text-gray-600">No messages yet...</div>}
-                    {messages.map((msg, i) => (
-                      <div key={i} className="msg-anim p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
-                        <p className="text-sm text-gray-200">{msg}</p>
-                      </div>
-                    ))}
-                 </div>
-
-                 <div className="p-4 border-t border-gray-800 bg-gray-900/30">
-                    <div className="relative">
-                      <input className="w-full bg-black border border-gray-700 rounded-full py-2 pl-4 pr-10 text-sm focus:border-green-500 focus:outline-none transition-colors" placeholder="Type a message..." />
-                      <Send className="absolute right-3 top-2.5 w-4 h-4 text-gray-500 cursor-pointer hover:text-green-400 transition-colors" />
-                    </div>
-                 </div>
-              </div>
-            )}
-
-            {/* TAB: GLOBAL TOP 10 */}
-            {tab === "global" && (
-              <div className="p-4 space-y-2 overflow-y-auto">
-                <h3 className="text-sm font-bold text-gray-400 mb-2 flex items-center gap-2">
-                  <Globe className="w-4 h-4" /> Trending Now
-                </h3>
-                {topSites.map((room, i) => (
-                  <div 
-                    key={room.site}
-                    onClick={() => window.open(\`https://\${room.site}\`, '_blank')}
-                    className="flex justify-between items-center p-3 bg-gray-900 rounded hover:bg-gray-800 cursor-pointer border border-gray-800 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-500 font-mono text-xs">#{i+1}</span>
-                      <span className="font-bold text-sm truncate w-40">{room.site}</span>
-                    </div>
-                    <span className="text-xs bg-green-900 text-green-400 px-2 py-1 rounded-full">
-                      {room.count}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
-    </>
+
+      {!token ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <MessageSquare className="text-green-500 w-12 h-12 mb-4 animate-bounce" />
+          <h2 className="text-xl font-bold mb-2">Xchat Me</h2>
+          <button onClick={login} className="bg-white text-black font-bold py-3 px-8 rounded-full flex items-center gap-2 mt-4 hover:bg-gray-200 transition-colors">
+            <X className="w-5 h-5" /> Sign in with X
+          </button>
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {tab === "current" && (
+            <div className="flex-1 flex flex-col">
+               <div className="p-3 bg-gray-900/50 border-b border-gray-800">
+                  <span className="text-xs text-gray-500 uppercase">Connected to:</span>
+                  <div className="text-green-400 font-bold truncate">{site}</div>
+               </div>
+               <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {messages.length === 0 && <div className="text-center mt-20 text-gray-600">No messages yet...</div>}
+                  {messages.map((msg, i) => (
+                    <div key={i} className="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+                      <p className="text-sm text-gray-200">{msg}</p>
+                    </div>
+                  ))}
+               </div>
+               <div className="p-4 border-t border-gray-800 bg-gray-900/30">
+                  <div className="relative">
+                    <input className="w-full bg-black border border-gray-700 rounded-full py-2 pl-4 pr-10 text-sm focus:border-green-500 focus:outline-none transition-colors" placeholder="Type a message..." />
+                    <Send className="absolute right-3 top-2.5 w-4 h-4 text-gray-500 cursor-pointer hover:text-green-400 transition-colors" />
+                  </div>
+               </div>
+            </div>
+          )}
+          {tab === "global" && (
+            <div className="p-4 space-y-2 overflow-y-auto">
+              <h3 className="text-sm font-bold text-gray-400 mb-2 flex items-center gap-2">
+                <Globe className="w-4 h-4" /> Trending Now
+              </h3>
+              {topSites.map((room, i) => (
+                <div 
+                  key={room.site}
+                  onClick={() => window.open(\`https://\${room.site}\`, '_blank')}
+                  className="flex justify-between items-center p-3 bg-gray-900 rounded hover:bg-gray-800 cursor-pointer border border-gray-800 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-500 font-mono text-xs">#{i+1}</span>
+                    <span className="font-bold text-sm truncate w-40">{room.site}</span>
+                  </div>
+                  <span className="text-xs bg-green-900 text-green-400 px-2 py-1 rounded-full">
+                    {room.count}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 `
         }
       },
       {
-        title: "6. Build & Install",
+        title: "7. Build & Install",
         actionItems: [
           "Run npm run build in xchat-me-frontend.",
           "Open Chrome -> chrome://extensions -> Load Unpacked -> Select dist folder.",

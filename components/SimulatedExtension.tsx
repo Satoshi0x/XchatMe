@@ -9,16 +9,18 @@ interface SimulatedExtensionProps {
 
 export default function SimulatedExtension({ isOpen, site, onNavigate }: SimulatedExtensionProps) {
   const [token, setToken] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [tab, setTab] = useState<"current" | "global">("current");
   const [messages, setMessages] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState("");
 
   // Mock Data for the demo
   const topSites = [
+    { site: "xchat.me", count: 1542 },
     { site: "google.com", count: 1243 },
     { site: "youtube.com", count: 856 },
     { site: "x.com", count: 542 },
     { site: "github.com", count: 321 },
-    { site: "netflix.com", count: 198 },
   ];
 
   // Simulate receiving a message when opened
@@ -35,7 +37,14 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
     // Simulate login flow
     setTimeout(() => {
         setToken("mock-token-123");
+        setCurrentUser("DevBuilder"); // Simulated authenticated user
     }, 500);
+  };
+
+  const handleSendMessage = () => {
+    if (!inputValue.trim()) return;
+    setMessages(prev => [...prev, `Me: ${inputValue}`]);
+    setInputValue("");
   };
 
   return (
@@ -109,7 +118,12 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
                             {user.charAt(0)}
                           </div>
                           {isMe ? (
-                            <span className="text-xs text-gray-300 font-medium">Me</span>
+                            <button 
+                              onClick={() => onNavigate(`https://x.com/${currentUser || 'Me'}`)}
+                              className="text-xs text-gray-300 hover:text-white font-medium hover:underline transition-colors focus:outline-none"
+                            >
+                              Me
+                            </button>
                           ) : (
                             <button 
                               onClick={() => onNavigate(`https://x.com/${user}`)}
@@ -131,14 +145,16 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
                     <input 
                         className="w-full bg-black border border-gray-700 rounded-full py-2 pl-4 pr-10 text-sm focus:border-green-500 focus:outline-none transition-colors text-white" 
                         placeholder="Type a message..." 
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => {
-                            if(e.key === 'Enter') {
-                                setMessages([...messages, `Me: ${(e.target as HTMLInputElement).value}`]);
-                                (e.target as HTMLInputElement).value = '';
-                            }
+                            if(e.key === 'Enter') handleSendMessage();
                         }}
                     />
-                    <Send className="absolute right-3 top-2.5 w-4 h-4 text-gray-500 cursor-pointer hover:text-green-400 transition-colors" />
+                    <Send 
+                      className="absolute right-3 top-2.5 w-4 h-4 text-gray-500 cursor-pointer hover:text-green-400 transition-colors" 
+                      onClick={handleSendMessage}
+                    />
                   </div>
                </div>
             </div>
