@@ -27,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sections, activeId }) => {
     <aside className="hidden lg:block w-72 fixed h-screen top-0 left-0 border-r border-gray-800 bg-[#0d1117]/50 backdrop-blur-xl pt-20 pb-10 px-6">
       <nav className="space-y-1">
         <div className="mb-8 px-3">
-            <h1 className="text-xl font-bold text-white tracking-tight">Xchat Me</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">XchatterME</h1>
             <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-semibold">Master Guide</p>
         </div>
 

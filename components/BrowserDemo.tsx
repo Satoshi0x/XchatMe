@@ -33,7 +33,7 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
               2025 Architecture Edition
             </div>
             <h1 className="text-3xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 tracking-tight mb-6">
-              Xchat Me <br/> Master Guide
+              XchatterME <br/> Master Guide
             </h1>
             <p className="text-lg text-gray-400 leading-relaxed max-w-2xl">
               The complete "Copy-Paste" blueprint for building a distributed chat architecture.
@@ -44,7 +44,7 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
             <Section key={section.id} data={section} />
           ))}
           <footer className="mt-20 pt-12 border-t border-gray-800 text-center text-gray-500 text-sm pb-12">
-            <p>© 2025 Xchat Me Architecture.</p>
+            <p>© 2025 XchatterME Architecture.</p>
           </footer>
       </div>
     </div>
@@ -65,9 +65,9 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
         <Search className="absolute left-4 top-3 text-gray-400" size={20} />
         <input 
           className="w-full border border-gray-200 rounded-full py-3 pl-12 pr-12 shadow-sm hover:shadow-md transition-shadow outline-none text-gray-700" 
-          defaultValue="Xchat Me Architecture Guide"
+          defaultValue="XchatterME Architecture Guide"
           onKeyDown={(e) => {
-            if (e.key === 'Enter') handleNavigate('https://xchat.me');
+            if (e.key === 'Enter') handleNavigate('https://xchatter.me');
           }}
         />
         <div className="absolute right-4 top-2.5 flex gap-3 text-gray-500">
@@ -78,7 +78,7 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
 
       <div className="flex gap-3">
         <button 
-          onClick={() => handleNavigate('https://xchat.me')}
+          onClick={() => handleNavigate('https://xchatter.me')}
           className="bg-[#f8f9fa] border border-[#f8f9fa] hover:border-[#dadce0] hover:shadow-sm px-4 py-2 text-sm text-[#3c4043] rounded font-medium"
         >
           Google Search
@@ -137,7 +137,7 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
 
             <p className="mt-4 text-sm leading-5">
                 Building cool things with Cloudflare Workers & React. 🚀 <br/>
-                Contributor to Xchat Me Architecture.
+                Contributor to XchatterME Architecture.
             </p>
 
             <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 text-sm text-gray-500">
@@ -186,19 +186,19 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
                         <span className="text-gray-500 text-sm">@{username} · 2h</span>
                     </div>
                     <p className="text-sm mt-1">
-                        Just dropped the new Xchat Me Architecture Guide! 
+                        Just dropped the new XchatterME Architecture Guide! 
                         Check it out to learn how to build distributed chat apps on the Edge. 👇
                     </p>
                     <div 
                       className="mt-3 rounded-2xl border border-gray-700 overflow-hidden bg-black cursor-pointer hover:border-gray-600 transition-colors"
-                      onClick={() => handleNavigate('https://xchat.me')}
+                      onClick={() => handleNavigate('https://xchatter.me')}
                     >
                         <div className="h-32 bg-gray-800 flex items-center justify-center">
-                            <span className="text-gray-500 font-mono text-xs">xchat-architecture-preview.png</span>
+                            <span className="text-gray-500 font-mono text-xs">xchatter-architecture-preview.png</span>
                         </div>
                         <div className="p-3 bg-[#0d1117]">
-                            <div className="text-sm text-gray-400">xchat.me</div>
-                            <div className="text-sm text-white">Xchat Me Master Guide</div>
+                            <div className="text-sm text-gray-400">xchatter.me</div>
+                            <div className="text-sm text-white">XchatterME Master Guide</div>
                         </div>
                     </div>
                  </div>
@@ -210,7 +210,7 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
 
   const renderPage = () => {
     if (url.includes('x.com')) return <XProfilePage />;
-    if (url.includes('xchat.me')) return <GuidePage />;
+    if (url.includes('xchatter.me')) return <GuidePage />;
     return <GooglePage />;
   };
 
@@ -219,8 +219,8 @@ const BrowserDemo: React.FC<BrowserDemoProps> = ({ onExit }) => {
       {/* Header / Instructions */}
       <div className="flex justify-between items-center mb-4">
         <div className="text-white">
-          <h2 className="text-xl font-bold">Live Architecture Demo</h2>
-          <p className="text-sm text-gray-400">Click the Xchat icon in the browser toolbar to test the extension.</p>
+          <h2 className="text-xl font-bold">XchatterME Demo</h2>
+          <p className="text-sm text-gray-400">Click the XchatterME icon in the browser toolbar to test the extension.</p>
         </div>
         <button 
           onClick={onExit}

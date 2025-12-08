@@ -16,12 +16,21 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
 
   // Mock Data for the demo
   const topSites = [
-    { site: "xchat.me", count: 1542 },
+    { site: "xchatter.me", count: 1542 },
     { site: "google.com", count: 1243 },
     { site: "youtube.com", count: 856 },
     { site: "x.com", count: 542 },
     { site: "github.com", count: 321 },
   ];
+
+  // Restore session from localStorage (Simulating chrome.storage.local)
+  useEffect(() => {
+    const storedUser = localStorage.getItem('xchatter_username');
+    if (storedUser) {
+        setToken("mock-token-stored");
+        setCurrentUser(storedUser);
+    }
+  }, []);
 
   // Simulate receiving a message when opened
   useEffect(() => {
@@ -36,14 +45,18 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
   const login = () => {
     // Simulate login flow
     setTimeout(() => {
+        const mockUser = "DevBuilder";
         setToken("mock-token-123");
-        setCurrentUser("DevBuilder"); // Simulated authenticated user
+        setCurrentUser(mockUser);
+        localStorage.setItem('xchatter_username', mockUser); // Store in local storage
     }, 500);
   };
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
-    setMessages(prev => [...prev, `Me: ${inputValue}`]);
+    // Use stored username for sent messages
+    const sender = currentUser || "Me";
+    setMessages(prev => [...prev, `${sender}: ${inputValue}`]);
     setInputValue("");
   };
 
@@ -76,7 +89,7 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
       {!token ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <MessageSquare className="text-green-500 w-12 h-12 mb-4 animate-bounce" />
-          <h2 className="text-xl font-bold mb-2">Xchat Me</h2>
+          <h2 className="text-xl font-bold mb-2">XchatterME</h2>
           <p className="text-gray-400 text-sm mb-6">Chat with people on the same website as you, right now.</p>
           <button onClick={login} className="bg-white text-black font-bold py-3 px-8 rounded-full flex items-center gap-2 hover:bg-gray-200 transition-colors">
             <X className="w-5 h-5" /> Sign in with X
@@ -109,7 +122,7 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
                     
                     if (isSystem) return <div key={i} className="text-xs text-gray-500 text-center py-2">{msg}</div>;
 
-                    const isMe = user === 'Me';
+                    const isMe = user === 'Me' || (currentUser && user === currentUser);
 
                     return (
                       <div key={i} className="animate-[slideIn_0.3s_ease-out] p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
@@ -122,7 +135,7 @@ export default function SimulatedExtension({ isOpen, site, onNavigate }: Simulat
                               onClick={() => onNavigate(`https://x.com/${currentUser || 'Me'}`)}
                               className="text-xs text-gray-300 hover:text-white font-medium hover:underline transition-colors focus:outline-none"
                             >
-                              Me
+                              {currentUser || 'Me'}
                             </button>
                           ) : (
                             <button 

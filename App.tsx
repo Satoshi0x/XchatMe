@@ -42,7 +42,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-[#050505] selection:bg-indigo-900 selection:text-indigo-100">
       {/* Mobile Header */}
       <div className="lg:hidden sticky top-0 z-50 flex items-center justify-between p-4 bg-[#0d1117]/90 backdrop-blur border-b border-gray-800">
-        <span className="font-bold text-white">Xchat Me Guide</span>
+        <span className="font-bold text-white">XchatterME Guide</span>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-400">
           <Menu />
         </button>
@@ -80,10 +80,10 @@ const App: React.FC = () => {
               2025 Architecture Edition
             </div>
             <h1 className="text-4xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 tracking-tight mb-6">
-              Xchat Me <br/> Master Guide
+              XchatterME <br/> Master Guide
             </h1>
             <p className="text-xl text-gray-400 leading-relaxed max-w-2xl">
-              The complete "Copy-Paste" blueprint for building a distributed chat architecture using Cloudflare Workers, DynamoDB, and Chrome Extensions.
+              The complete "Copy-Paste" blueprint for building a distributed chat architecture using Render, Supabase, and Chrome Extensions.
             </p>
 
             <div className="flex gap-4 mt-8 flex-wrap">
@@ -110,7 +110,7 @@ const App: React.FC = () => {
 
           {/* Footer */}
           <footer className="mt-32 pt-12 border-t border-gray-800 text-center text-gray-500 text-sm pb-12">
-            <p>© 2025 Xchat Me Architecture. Open Source Guide.</p>
+            <p>© 2025 XchatterME Architecture. Open Source Guide.</p>
           </footer>
         </div>
       </main>
