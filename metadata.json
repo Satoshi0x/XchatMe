@@ -1,5 +1,5 @@
 {
   "name": "XchatterME Architecture Guide",
-  "description": "Interactive documentation and copy-paste master guide for building the XchatterME architecture using Render and Supabase (Free Tier).",
+  "description": "Interactive documentation and copy-paste master guide for building the XchatterME architecture using Cloudflare Workers and DynamoDB.",
   "requestFramePermissions": []
 }
